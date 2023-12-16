@@ -14,5 +14,20 @@ variable "actions" {
 
 variable "parent_path" {
   description = "Parent path"
-  type = string
+  type        = string
+}
+
+variable "domain_name" {
+  description = "Custom Domain Name"
+  type        = string
+}
+
+variable "api_domain_name" {
+  description = "API Gateway Domain Name"
+  type        = string
+}
+
+variable "acm_certificate_arn" {
+  description = "ACM Certification ARN"
+  type        = string
 }

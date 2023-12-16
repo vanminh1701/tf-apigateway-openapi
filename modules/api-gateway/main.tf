@@ -1,5 +1,7 @@
 locals {
 
+  stage_name = "dev"
+
   ## Handle actions
   # Calculate all api paths
   unique_paths = distinct([for each_action in var.actions : "${var.parent_path}/${each_action.path_part}"])
@@ -85,6 +87,9 @@ resource "aws_api_gateway_rest_api" "api_gateway" {
     types = ["REGIONAL"]
   }
 
+  # Limit access from default execute-api endpoint
+  #disable_execute_api_endpoint = true
+
   tags = var.tags
 }
 
@@ -103,7 +108,22 @@ resource "aws_api_gateway_deployment" "api_gateway" {
 resource "aws_api_gateway_stage" "dev" {
   deployment_id = aws_api_gateway_deployment.api_gateway.id
   rest_api_id   = aws_api_gateway_rest_api.api_gateway.id
-  stage_name    = "dev"
+  stage_name    = local.stage_name
 
   tags = var.tags
+}
+
+resource "aws_api_gateway_domain_name" "domain" {
+  domain_name              = var.api_domain_name
+  regional_certificate_arn = var.acm_certificate_arn
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+resource "aws_api_gateway_base_path_mapping" "apigateway_mapping" {
+  api_id      = aws_api_gateway_rest_api.api_gateway.id
+  domain_name = aws_api_gateway_domain_name.domain.domain_name
+  stage_name  = local.stage_name
 }
